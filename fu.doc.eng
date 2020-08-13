@@ -1,0 +1,636 @@
+
+      File Management Utility  <<< fu  Ver 3.07 >>>
+
+                                Copyright (c) 1991-1998 T.Tashiro
+
+   *** This document might have many mistaken about syntax, spelling and etc...
+   ***  So, I'm not native speaker of English.
+   ***  Please let me know the information of my mistaken. 
+   ***  Thank you for your advice. (e-mail: Takashi.Tashiro@nifty.ne.jp)
+
+### 1. What's "fu"? ###
+        "fu" is one of the text-console based file management utility.
+  You just move the file-selector cursor by using the arrow-keys.
+  After that you can copy, move, delete and display etc...
+  It's very easy operation. Moreover you can customize all key assignments
+  as you like.  Try it!!
+
+
+### 2. How to Install ###
+  1) Compile
+    Do 'make' with appropriate option according as your OS and/or machine.
+
+        make hpux       HP-UX on HP9000 series
+        make linux      Linux
+        make bsdi       BSDI
+        make h2050      HI-UX on Hitachi 2050 workstation
+        make i386bsd    386BSD
+        make panix      PANIX
+        make minix      Minix
+        make sunos      SunOS
+        make news3400   Sony News3400
+
+        Caution: I've tried hpux, linux and bsdi only.
+                 Other one might have some problem.
+                 (I'll thank you for your information.)
+
+        X version fu('xfu') will be created when you added '-x' to each options.
+        (like 'make hpux-x') I don't recomend you to use xfu. (I have not tested
+        this enough and I don't have any confidence of this.)
+
+  2) Installation
+    Copy 'fu' to any directory which was included by PATH.
+    (I recomend to copy this to '/usr/local/bin')
+
+
+### 3. Commandline Options ###
+  1) Text Console Version ('fu')
+    Format:
+      $ fu [options]
+
+    Options:
+      -a           ASCII code mode (Chinese character will convert to '?')
+      -k           Chinese character available mode (default)
+      -s           Shift-JIS Chinese character mode
+      -e           EUC Chinese character mode
+
+  2) X Window Version ('xfu')
+    Format:
+      $ xfu [options]
+
+    Options:
+      -a           ASCII code mode (Chinese character will convert to '?')
+      -k           Chinese character available mode (default)
+      -s           Shift-JIS Chinese character mode
+      -e           EUC Chinese character mode
+      -display host:display    X Server host and display name
+      -geometry geom           window geometry
+      -name title              window title string
+      -fg color                foreground color
+      -bg color                background color
+      -fn fontname             ASCII code font name
+      -fr font_kana            KANA code font name
+      -fk font_kanji           Chinese character font name
+
+    Resources:
+      xfu.Title:               window title string
+      xfu.Geometry:            window geometry
+      xfu.Foreground:          foreground color
+      xfu.Background:          background color
+      xfu.Font:                ASCII code font name
+      xfu.KanaFont:            KANA code font name
+      xfu.KanjiFont:           Chinese character font name
+
+
+### 4. Display Layout ###
+  1) Filename Display Mode
+
+--------------------------------------------------------------------------------
+Current Dir(0) : /usr/tashiro
+ [.             ]drwxr-xr-x 11/08 18:01  .profile       -rw-r--r-- 11/05 10:01^^
+ [..            ]drwxr-xr-x 11/08 11:10  .rhosts        -rw-r--r-- 10/30 09:01
+ [DDC           ]drwxrwxrwx 11/01 19:24  .setup.fu      -rw-r--r-- 07/29 16:49
+ [JUS_FREE      ]drwxr-xr-x 10/15 16:22  .setup.mfu     -rw-r--r-- 10/29 11:05PP
+ [Wnn           ]drwxrwxrwx 10/25 1990   .wsdb.def      -rw-r--r-- 10/29 15:49RR
+ [bin           ]drwxr-xr-x 11/08 11:10  .tree.fu       -rw-r--r-- 11/05 09:59EE
+ [bitmaps       ]drwxr-xr-x 10/28 13:00  .xinitrc       -rw-r--r-- 10/09 08:11VV
+ [comm          ]drwxr-xr-x 10/30 16:06  .xsession      -rw-r--r-- 10/09 08:50
+ [projectA      ]drwxr-xr-x 09/27 15:18  calendar       -rw-r--r-- 11/07 09:55
+ [image         ]drwxr-xr-x 08/01 21:58  emacs.rc       -rw-r--r-- 05/20 08:25--
+ [nfs           ]drwxr-xr-x 12/26 1990   jldx00         -rw-rw-rw- 09/27 17:22
+ [rex           ]drwxr-xr-x 10/07 20:59  jldx10         -rw-rw-rw- 09/27 17:24
+ [rexapp        ]drwxr-xr-x 10/29 10:58  kankan         -rw-rw-rw- 10/24 09:10NN
+ [test          ]drwxr-xr-x 10/15 07:55                                       EE
+ [tool          ]drwxr-xr-x 11/07 13:19                                       XX
+ [txt           ]drwxr-xr-x 10/29 10:52                                       TT
+  .Xresources    -rw-r--r-- 11/05 10:18
+  .dbacc.def     -rw-r--r-- 10/28 13:51
+  .mwmrc         -rw-r--r-- 10/30 08:43                                       vv
+== File Management Utility Ver.3.07 =============================== T.Tashiro ==
+Command : Copy Delete Edit Find Quit Shell Tree eXecute Mount UnMount (1) (2)
+          (4)
+Find : *
+--------------------------------------------------------------------------------
+
+    Row #
+      1           directory path
+                  number in paurce is stacked path count
+      2-20        filename display area (79-80 column is scroll bar)
+                    - 1 column mode
+                      column : contents
+                        1    : '*' will appear if the file was selected
+                       2,17  : '[',']' means this one is directory
+                       3-16  : filename field
+                      18-27  : file access status field
+                      29-31  : number of file link
+                      33-40  : owner name
+                      42-49  : owner group
+                      51-58  : file size in byte
+                      60-76  : last modified date
+
+                    - 2 columns mode
+                      column : contents
+                        1    : '*' will appear if the file was selected
+                       2,17  : '[',']' means this one is directory
+                       3-16  : filename field
+                      18-27  : file access status field
+                      29-39  : last modified date
+
+                    - 3 columns mode
+                      column : contents
+                        1    : '*' will appear if the file was selected
+                       2,25  : '[',']' means this one is directory
+                       3-24  : filename field
+
+                    - 4 columns mode
+                      column : contents
+                        1    : '*' will appear if the file was selected
+                       2,17  : '[',']' means this one is directory
+                       3-16  : filename field
+
+      21          Information line (tool name and version)
+      22-23       Command menu
+      24          Filename mask
+
+
+  2) Directory Tree Display Mode
+--------------------------------------------------------------------------------
+Path : /hd/tashiro/GAEA
+ /              >                                                             ^^
+ +- hd             >
+     +- tashiro
+         +- DDC            >
+         +- GAEA           >                                                  PP
+         +- JUS_FREE       >                                                  RR
+         +- Wnn            >                                                  EE
+         +- bin                                                               VV
+         |   +- mo_eps         >
+         +- bitmaps        >
+         +- compkg         >
+         |   +- vos3           >                                              --
+         |       +- single_chk
+         +- gtproject      >
+         +- image          >                                                  NN
+         +- nfs            >                                                  EE
+         +- rex            >                                                  XX
+         +- rexapp         >                                                  TT
+         +- test           >
+         +- tool           >
+         +- txt            >
+                                                                              vv
+--------------------------------------------------------------------------------
+    Row #
+      1           directory path
+      2-23        directory tree display area
+                  last '>' means it's doesn't show all child directory names
+                      (It's folded.)
+
+
+### 5. Operation ###
+  1) Key Operations in Filename Display Mode (default assignment)
+      Arrow Keys    :  move cursor
+      Shift + Up    :  previous page
+      Shift + Down  :  next page
+      Prev.Page     :  previous page
+      Next.Page     :  next page
+      Space         :  toggle selecting status
+      Return        :  cursor position file is
+                         directory -> move to the directory
+                         archived file -> display the list of content
+                         other file -> display the contents
+      Delete        :  file/directory delete
+      Home          :  select all files
+      Ctrl-B        :  cursor move left
+      Ctrl-F        :  cursor move right
+      Ctrl-N        :  cursor down
+      Ctrl-P        :  cursor up
+      Ctrl-Z        :  previous page
+      Ctrl-V        :  next page
+      Ctrl-L        :  refresh screen
+      Ctrl-X Ctrl-C :  quit 'fu'
+      "+"           :  push directory path to stack
+      "-"           :  pop directory path from stack (move to the directory)
+      "/"           :  change directory
+      "1"           :  1 column mode
+      "2"           :  2 columns mode
+      "3"           :  3 columns mode
+      "4"           :  4 columns mode
+      "c"           :  copy selected file/dir *1
+      "C"           :  copy selected file/dir *1
+                       (You can select destination directory by Dir.Tree screen)
+      "d"           :  delete selected file/dir
+      "e"           :  edit selected file by "em"(Micro Emacs)
+      "f"           :  specify the filename display mask
+      "j"           :  cursor move to the file which is specified first letter
+      "q"           :  quit "fu"
+      "r"           :  rename selected file/dir
+      "s"           :  execute command on shell mode
+      "t"           :  change current dir. (show dir tree)
+      "T"           :  change current dir. (show dir tree)
+      "x"           :  execute selected file
+      "mo"          :  mount /dev/fd2d0a /fd1
+      "um"          :  umount /dev/fd2d0a
+      "md"          :  create directory
+      "al"          :  show file name in selected archive file
+      "ar"          :  archive selected files
+      "ua"          :  unarchive selected archive file
+      "mv"          :  move selected file/dir
+      "MV"          :  move selected file/dir
+                       (You can select destination directory by Dir.Tree screen)
+
+    *1   'fu' will ask you what 'fu' will do if there was same name file
+       in destination directory. You can select from below.
+           's' : Skip   just skip copy/move process of the file
+           't' : Time   if source is new one then copy it
+           'f' : Force  force it
+           'a' : Abort  cancel copy/move command
+
+         If you specified these options in upper case letter then the option
+          will apply to all process after this.
+
+  2) Key Operations in Directory Tree Display Mode
+      SHIFT + Up        :  previous page
+      SHIFT + Down      :  next page
+      Prev.Page         :  previous page
+      Next.Page         :  next page
+      Return            :  specify the directory
+      ESC ESC           :  quit Directory Tree Display Mode
+      SPACE             :  unfold selected directory
+      Ctrl-N (or Down)  :  cursor down
+      Ctrl-P (or Up)    :  cursor up
+      Ctrl-F (or Right) :  unfold selected directory and move down
+      Ctrl-B (or Left)  :  cursor up
+      Ctrl-Z            :  previous page
+      Ctrl-V            :  next page
+      "q"               :  quit Directory Tree Display Mode
+
+  3) Key Operations in text input mode
+      Up            :  show last inputed string (back history)
+      Down          :  forward history
+      Right         :  cursor right
+      Left          :  cursor left
+      BS            :  back space
+      Delete        :  delete one character
+      ESC ESC       :  cancel intput string
+
+
+### 6. Command Template and Macro Character ###
+        Command string which is specified at the 'Shell' or 'Exec' command
+  can be contain some macro characters. These macro character will be expanaded
+  before the execution on shell program like. The command string which contain
+  some macro characters is called command template.
+
+  example:
+
+    Shell> vi %*                                test.c,test2.c and test.h
+             |                                    are selecting
+             V
+       "vi test.c test2.c test.h"               macro character "%*" was expanded
+             |                                    to the selecting file names
+             V
+       system("vi test.c test2.c test.h")       execute the expanded command string
+                                                  on shell program
+
+
+  Macro characters:
+
+      %f : is replaced to selecting filename          "chmod u+x %f"
+           and execute it. If some files were                |
+           selected then replace and execute                 V
+           for each file.                             "chmod u+x test"
+                                                      "chmod u+x test2"
+                                                            ...
+
+      %1 : is replaced to the filename which is       "mv %1 test2"
+           pointed by file selection cursor.                 |
+           (selecting file will be ignored)                  V
+                                                      "mv test test2"
+
+      %* : is replaced to selecting filenames         "em %*"
+           which are separated by a blank.                   |
+           Then execute at once.                             V
+                                                      "em test1.c test2.c ..."
+
+      %l : is replaced to the temporary filename      "cpio -o <%l >pak"
+           which file contain the selecting filenames.       |
+                                                             V
+                                                      "cpio -o <.fu012345 >pak"
+                                                                temporary file
+  Modifier:
+        There are four kind of modifier which can append to the macro character.
+    (It assume "/usr/tashiro/aaa.bbb.c" is the selecting file in below examples.)
+      @p : replace to the prefix          (example: "%1@p" -> "aaa.bbb")
+      @s : replace to the suffix          (example: "%*@s" -> ".c")
+      @d : replace to the directory path  (example: "%1@d" -> "/usr/tashiro")
+      @a : replace to the full path name  (example: "%1@d" -> "/usr/tashiro/aaa.bbb.c")
+
+
+### 7. Customize ###
+
+  1) Setup file
+        You can change key assignment as your favorite by creating the
+    setup file. Setup file name is '.setup.fu' and please place it at
+    your home directory.
+
+     *** Setup file is read at only the begining of 'fu'.
+     *** Please re-execute 'fu' if you make any change of your setup
+     *** file.
+
+    Setup file format specification:
+      - the line begin with '#' will be regarded as comment line.
+      - the line begin with '#com' will be regarded as the command menu
+        strings.
+        (These strings will be shown in lower line of screen.
+          (following by 'Command:'))
+        example:
+          #com "Copy" "Delete" "Edit" "Find" "MaKe" "PRint" "Quit" "Shell"
+          #com "Tree" "searchTree" "View" "eXecute"
+      - key assignment description
+
+        keyname switch com_temp
+               ^      ^
+               TAB code or one or more blanks
+
+        keyname  : key name shown in the section '8. Key and internal 
+                    comand name list' or the key code
+                   double-quoted string is regarded as key code.
+                   also you can specify the special character by "\"B
+                         \??? : ASCII code ('???' is octal)
+                         \"   : '"'
+                         \\   : '\'
+                   example:
+                     "\033[A"    (esc),'[','A'
+                     key_down    down arrow keyijust for Hitachi 2050)
+                     "del"       'd','e','l'
+        switch   : command execution mode (only for the external command)
+                    1 : go to 'Shell>' mode and user will have the chance
+                         to change the command string.
+                    0 : execute directly (don't go to 'Shell>' mode)
+        com_temp : command template string which you want to assign
+                    If this string is begined with '$' then this will
+                    be regarded as internal command name.
+                    (internal command name list is shown in the section
+                      '8. Key and internal command name list')
+
+    Setup file example:
+      #
+      #      File Utility Command Setup File
+      #
+      "e"         0     em %*
+      "E"         1     em %*
+      "pk"        1     cpio -p <%l >
+      "up"        1     cat %1 | cpio -i
+      "\016"      0     $func_down
+      "\020"      0     $func_up
+      "\030\003"  0     $func_quit
+      key_zenpeji 0     $func_s_up
+      key_jipeji  0     $func_s_down
+
+
+  2) Parameters in the header file
+        You can change some numbers which was defined in the header file.
+    Of course, you should re-compile 'fu'. ;-)
+
+    Constants in the 'fu.h':
+      #define FILE_ENT     1024    number of file name entries in one screen
+      #define TREE_ENT     1024    number of dir.name entries in tree mode screen
+      #define USER_ID_ENT  1024    number of user-ID and username list
+                                   (please set more than the number of entries
+                                     in your '/etc/passwd')
+      #define GROUP_ID_ENT 256     number of group-ID and groupname list
+                                   (please set more than the number of entries
+                                     in your '/etc/group')
+      #define MAX_KEY_FUNC 200     number of the entries in the key assignment table
+      #define MAX_FUNC_CMD 200     number of the functions
+      #define HIST_CN      30      line count of history buffer
+      #define LZHARC       "lha"   archiver of '*.lzh' file
+
+    Variables in the 'futable.h':
+      int sc_mode = 2;          default screem mode
+                                   1 : 1 column mode
+                                   2 : 2 columns mode
+                                   3 : 3 columns mode
+                                   4 : 4 columns mode
+      int arc_mode = ARC_LZH;   default archiver
+                                   ARC_LZH  : 'lha'            ('*.lzh')
+                                   ARC_TAR  : 'tar'            ('*.tar')
+                                   ARC_TAz  : 'tar'+'pack'     ('*.taz')
+                                   ARC_TAZ  : 'tar'+'compress' ('*.taZ')
+                                   ARC_TARz : 'tar'+'pack'     ('*.tar.z')
+                                   ARC_TARZ : 'tar'+'compress' ('*.tar.Z')
+
+
+### 8. Key and internal command name list ###
+
+  1) Key name list (most of these will work on Hitachi 2050 only)
+    "key_torikesi"      :  'TORIKESHI'
+    "key_down"          :  down arrow
+    "key_up"            :  up arrow
+    "key_kakutyou"      :  'KINOU KAKUTYOU'
+    "key_pa1"           :  PA1
+    "key_pa2"           :  PA2
+    "key_pa3"           :  PA3
+    "key_screen"        :  'SUKURI-N'
+    "key_srq"           :  SRQ
+    "key_pa4"           :  PA4
+    "key_tyudan"        :  'CHU-DAN'
+    "ket_test"          :  'TESUTO'
+    "key_jikkou"        :  'JIKKOU'
+    "key_field"         :  'FI-RUDO'
+    "key_print"         :  'INNSATSU'
+    "key_henkantaishou" :  'HENKAN TAISYOU'
+    "key_function"      :  'FANKUSYON'
+    "key_saihenkan"     :  'SAIHENKAN'
+    "key_s_function"    :  SHFT + 'FANKUSYON'
+    "key_data"          :  'DE-TA'
+    "key_stopprint"     :  'INNSATSU TYU-SI'
+    "key_c_function"    :  CTRL + 'FANKUSYON'
+    "key_s_home"        :  SHIFT + HOME
+    "key_s_up"          :  SHIFT + up arrow
+    "key_s_down"        :  SHIFT + down arrow
+    "key_s_right"       :  SHIFT + right arrow
+    "key_s_left"        :  SHIFT + left arrow
+    "key_s_bup"         :  SHIFT + [up arrow]
+    "key_s_bdown"       :  SHIFT + [down arrow]
+    "key_s_bright"      :  SHIFT + [right arrow]
+    "key_s_bleft"       :  SHIFT + [left arrow]
+    "key_s_zenpeji"     :  SHIFT + 'ZENNPE-JI'
+    "key_s_jipeji"      :  SHIFT + 'JIPE-JI'
+    "key_s_ins"         :  SHIFT + 'SOUNYUU'
+    "key_s_del"         :  SHIFT + 'SAKUJO'
+    "key_c_home"        :  CTRL + HOME
+    "key_c_up"          :  CTRL + up arrow
+    "key_c_down"        :  CTRL + down arrow
+    "key_c_right"       :  CTRL + right arrow
+    "key_c_left"        :  CTRL + left arrow
+    "key_c_bup"         :  CTRL + [up arrow]
+    "key_c_bdown"       :  CTRL + [down arrow]
+    "key_c_bright"      :  CTRL + [right arrow]
+    "key_c_bleft"       :  CTRL + [left arrow]
+    "key_c_zenpeji"     :  CTRL + 'ZENPE-JI'
+    "key_c_jipeji"      :  CTRL + 'JIPE-JI'
+    "key_c_ins"         :  CTRL + 'SOUNYUU'
+    "key_c_del"         :  CTRL + 'SAKUJO'
+    "key_pf1"           :  PF1
+    "key_pf2"           :  PF2
+    "key_pf3"           :  PF3
+    "key_pf4"           :  PF4
+    "key_pf5"           :  PF5
+    "key_pf6"           :  PF6
+    "key_pf7"           :  PF7
+    "key_pf8"           :  PF8
+    "key_pf9"           :  PF9
+    "key_pf10"          :  PF10
+    "key_pf11"          :  PF11
+    "key_pf12"          :  PF12
+    "key_c_pf1"         :  CTRL + PF1
+    "key_c_pf2"         :  CTRL + PF2
+    "key_c_pf3"         :  CTRL + PF3
+    "key_c_pf4"         :  CTRL + PF4
+    "key_c_pf5"         :  CTRL + PF5
+    "key_c_pf6"         :  CTRL + PF6
+    "key_c_pf7"         :  CTRL + PF7
+    "key_c_pf8"         :  CTRL + PF8
+    "key_c_pf9"         :  CTRL + PF9
+    "key_c_pf10"        :  CTRL + PF10
+    "key_c_pf11"        :  CTRL + PF11
+    "key_c_pf12"        :  CTRL + PF12
+    "key_bleft"         :  [left arrow]
+    "key_bright"        :  [right arrow]
+    "key_ins"           :  'SOUNYUU'
+    "key_del"           :  'SAKUJO'
+    "key_bup"           :  [up arrow]
+    "key_bdown"         :  [down arrow]
+    "key_jipeji"        :  'JIPE-JI'
+    "key_zenpeji"       :  'ZENPE-JI'
+    "key_right"         :  right arrow
+    "key_home"          :  HOME
+    "key_left"          :  left arrow
+    "key_dup"           :  DUP
+    "key_fm"            :  FM
+    "key_m_com1"        :  mouse click the first one in command menu (xfu)
+        ...                                  ...
+    "key_m_com40"       :  mouse click the 40th one in command menu (xfu)
+
+
+  2) Internal command name list
+    "func_nop"          :  no operation
+                           (dummy function for resign default assignment)
+    "func_mouse"        :  internal use (please don't use this)
+    "func_ret"          :  display file contents or change to the selected dir.
+    "func_select"       :  select cursor pointed file
+    "func_quit"         :  exit 'fu'
+    "func_delete"       :  file/directory delete
+    "func_copy"         :  file/directory copy
+    "func_cp_tree"      :  file/directory copy (disp dir. tree)
+    "func_edit"         :  edit file
+    "func_exec"         :  execute file
+    "func_shell"        :  go to 'Shell>' mode
+    "func_tree1"        :  change to the dir.tree diplay mode
+    "func_find"         :  change file search mask
+    "func_up"           :  cursor move up
+    "func_down"         :  cursor move down
+    "func_left"         :  cursor move left
+    "func_right"        :  cursor move right
+    "func_s_up"         :  move to previous page
+    "func_s_down"       :  move to next page
+    "func_bs"           :  back space (for string input mode)
+    "func_del"          :  delete character (for string input mode)
+    "func_scr_1"        :  1 column mode
+    "func_scr_2"        :  2 columns mode
+    "func_scr_3"        :  3 columns mode
+    "func_scr_4"        :  4 columns mode
+    "func_rdraw"        :  screen redraw
+    "func_all_sel"      :  all select
+    "func_chdir"        :  change directory
+    "func_rename"       :  rename file
+    "func_mount"        :  mount floppy disk (/dev/fd2d0a -> /fd1)
+    "func_umount"       :  unmount floppy disk
+    "func_mkdir"        :  make new directory
+    "func_arclist"      :  show contents of the archive file
+    "func_archive"      :  archive file
+    "func_unarc"        :  unarchive
+    "func_pushd"        :  push current dir to the dir.stack
+    "func_popd"         :  popup from dir.stack and change to it
+    "func_jump"         :  cursor jump to the file which specified 1st letter
+    "func_move"         :  file/directory move
+    "func_mv_tree"      :  file/directory move (disp dir. tree)
+    "func_backdir"      :  move to the directory before there
+    "func_forwdir"      :  move to the directory after there
+
+
+### 9. Licence ###
+        This license ("License") contains rights and restrictions
+  associated with use of accompanying software and documentation
+  ("Software").
+  Read the License carefully before installing the Software. 
+  By Installing the Software you agree to the terms and conditions of
+  this License.
+
+  1) You must not change copyright information include my name in
+    the Software.
+  2) You can free to modify the Software except 1) if that modification
+    is just for yourself.
+  3) You can free to distribute the Software only the distribution without
+    fee nor any modifications.
+     - Keep all original files in the distribution.
+     - You can free to add compiled executable files of 'fu'.
+     - You can free to add some special setup files of 'fu'.
+     - Please let me know if you have any occasion.(no obligation)
+  4) If you want to distribute the Software with any fee and/or any
+    modifications:
+     - You must be given the allowance prior to the distribution.
+     - Must be clear the differences from the original Software.
+  5) NO WARRANTY
+        I SHALL NOT BE LIABLE FOR ANY DAMAGES SUFFERED BY LICENSEE OR
+    THIRD PARTY AS A RESULT OF USING OR DISTRIBUTING SOFTWARE.
+    IN NO EVENT WILL I BE LIABLE FOR ANY LOST REVENUE, PROFIT OR DATA,
+    OR FOR DIRECT, INDIRECT, SPECIAL, CONSEQUENTIAL, INCIDENTAL OR
+    PUNITIVE DAMAGES, HOWEVER CAUSED AND REGARDLESS OF THE THEORY OF
+    LIABILITY, ARISING OUT OF THE USE OF OR INABILITY TO USE SOFTWARE,
+    EVEN IF I HAVE BEEN ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
+
+
+### 10. Changes ###
+  Ver 1.00  1990/04/16  T.Tashiro
+    - New created
+  Ver 1.01  1990/04/17  T.Tashiro
+  Ver 1.02  1990/04/17  T.Tashiro
+  Ver 1.03  1990/04/18  T.Tashiro
+  Ver 1.04  1990/04/20  T.Tashiro
+  Ver 1.05  1990/04/20  T.Tashiro
+  Ver 1.06  1990/05/14  T.Tashiro
+  Ver 2.00  1990/07/23  T.Tashiro
+  Ver 2.01  1990/07/27  T.Tashiro
+  Ver 2.02  1990/07/31  T.Tashiro
+  Ver 2.10  1990/08/08  T.Tashiro
+  Ver 2.11  1990/07/27  T.Tashiro
+  Ver 2.12  1990/09/12  T.Tashiro
+  Ver 2.13  1990/10/15  T.Tashiro
+  Ver 2.14  1990/10/23  T.Tashiro
+  Ver 2.20  1991/01/25  T.Tashiro
+  Ver 2.30  1991/03/28  T.Tashiro
+  Ver 2.31  1991/03/28  T.Tashiro
+  Ver 2.32  1991/06/21  T.Tashiro
+  Ver 2.33  1991/07/15  T.Tashiro
+  Ver 2.34  1991/07/16  T.Tashiro
+  Ver 2.35  1991/09/04  T.Tashiro
+  Ver 3.00  1991/11/26  T.Tashiro
+    - xfu was created
+  Ver 3.01  1991/01/21  T.Tashiro
+  Ver 3.02  1991/09/07  T.Tashiro
+  Ver 3.03  1992/11/23  T.Tashiro
+  Ver 3.04  1996/06/21  T.Tashiro
+  Ver 3.05  1997/09/26  T.Tashiro
+  Ver 3.06  1998/02/04  T.Tashiro
+  Ver 3.07  1998/06/18  T.Tashiro
+
+
+### 11. Known BUG ###
+        Bugs listed below were found in "fu" but haven't fixed yet.
+
+  1) Revesed area in the screen (ex. file cursor) happen to change
+    to normal attribute on 'hpterm'(HP-UX).
+    (There are no functional problem.)
+  2) 'xfu' happen to be locked after 'Shell' command execution.
+

@@ -1,0 +1,10 @@
+!
+!	xfu resources
+!
+ xfu.Title:		Xfu
+ xfu.Geometry:		21x40+20+20
+ xfu.Foreground:	White
+ xfu.Background:	Black
+! xfu.Font:		asc08
+! xfu.KanaFont:		j7kana08
+! xfu.KanjiFont:	sjis16
