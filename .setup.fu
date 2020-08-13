@@ -1,0 +1,42 @@
+#
+#	File Utility Command Setup File
+#
+#com "Copy" "Delete" "Edit" "Find" "MaKe" "PRint" "Quit" "Shell"
+#com "Tree" "View" "eXecute"
+#com "ARchive" "UnArc" "ArcList" "MOunt" "UnMount"
+#com "(1)" "(2)" "(3)" "(4)"
+key_m_com1	0	$func_cp_tree
+key_m_com2	0	$func_delete
+key_m_com3	0	em %*
+key_m_com4	0	$func_find
+key_m_com5	1	make 
+key_m_com6	2	prNS -g $HOME/bin/ph_01 %*
+key_m_com7	0	$func_quit
+key_m_com8	0	$func_shell
+key_m_com9	2	$func_tree1
+key_m_com10	0	em -v %*
+key_m_com11	0	$func_exec
+key_m_com12	1	$func_archive
+key_m_com13	1	$func_unarc
+key_m_com14	1	$func_arclist
+key_m_com15	2	$func_mount
+key_m_com16	2	$func_umount
+key_m_com17	2	$func_scr_1
+key_m_com18	2	$func_scr_2
+key_m_com19	2	$func_scr_3
+key_m_com20	2	$func_scr_4
+"e"		0	em %*
+"E"		0	mule %*@a
+"v"		2	em -v %*
+"V"		3	em -v %*
+"pr0"		3	prNS -g $HOME/bin/ph_01 %*
+"pr1"		3	prNS -r -g $HOME/bin/ph_02 %*
+"pr2"		3	prNS -n -g $HOME/bin/ph_03 %*
+"pr3"		3	prNS -rn -g $HOME/bin/ph_04 %*
+"pr4"		3	prNS -g $HOME/bin/ph_05 %*
+"pr5"		3	prNS -r -g $HOME/bin/ph_06 %*
+"pr6"		3	prNS -n -g $HOME/bin/ph_07 %*
+"pr7"		3	prNS -rn -g $HOME/bin/ph_08 %*
+"prt"		3	prNS -rn -t -g $HOME/bin/ph_txt -m20 -w100 -o10 -l30 %*
+"mk"		1	make
+"as"		0	$func_all_sel
