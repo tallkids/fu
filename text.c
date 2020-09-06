@@ -17,6 +17,7 @@
 #  include <termios.h> 
 #elif (H2050 | HP9000)
 #  include <termio.h> 
+#  include <termcap.h> 
 #endif
 #if MACOS
 #  include <curses.h>

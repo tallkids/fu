@@ -135,7 +135,7 @@ cygwin:
 	"CC=gcc" "LD=gcc" \
 	"TARGET=fu" \
 	"MCFLAGS=-DLINUX=1 -DHP9000=1" \
-	"LIB=-ltermcap"
+	"LIB=-lcurses"
 #
 bsdi:
 	make targets \

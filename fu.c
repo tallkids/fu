@@ -633,12 +633,12 @@ dsp_com_mes()
 	xt_loc(0,DSP_ROW+1);
 	xt_reverse();
 	if ( TITLEMINX <= X_WIDTH ) {
-		sprintf(buf,"== File Management Utility Ver.3.09 ");
+		sprintf(buf,"== File Management Utility Ver.3.10 ");
 		for ( c = strlen(buf) ; c < X_WIDTH - 13 ; c++ ) buf[c] = '=';
 		buf[c] = '\0';
 		strcat(buf," T.Tashiro ==");
 	} else {
-		sprintf(buf,"== fu 3.09 ");
+		sprintf(buf,"== fu 3.10 ");
 		for ( c = strlen(buf) ; c < X_WIDTH - 7 ; c++ ) buf[c] = '=';
 		buf[c] = '\0';
 		strcat(buf," T.T ==");
