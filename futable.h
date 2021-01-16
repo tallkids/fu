@@ -52,6 +52,7 @@ struct KEY_FUNC_TAG key_func[MAX_KEY_FUNC] = {
 	{ KEY_SIGWINCH,	NULL,	FUNC_WINCH,	0 },
 #endif
 	{ 0,		"\002",		FUNC_LEFT,	0 },
+	{ 0,		"\004",		FUNC_DEL,	0 },
 	{ 0,		"\006",		FUNC_RIGHT,	0 },
 	{ 0,		"\010",		FUNC_BS,	0 },
 	{ 0,		"\011",		FUNC_FNEXPAND,	0 },
@@ -423,9 +424,11 @@ char *push_dir[MAX_PUSHD];	/* Pushed directory */
 int pushd_cn = 0;		/* Number of pushed directory */
 
 #if H2050 | HP9000
-int os_kj_code = 0;		/* os kanji code (0:sjis,1:euc) */
+int os_kj_code = KJ_CODE_SJIS;	/* os kanji code (shift JIS) */
+#elif MACOS
+int os_kj_code = KJ_CODE_UTF8;	/* os kanji code (UTF-8) */
 #else
-int os_kj_code = 1;		/* os kanji code (0:sjis,1:euc) */
+int os_kj_code = KJ_CODE_EUC;	/* os kanji code (EUC) */
 #endif
 int fn_kj_code = 0;		/* font kanji code  (0:sjis,1:jis) */
 int fn_ka_code = 0;		/* font kana code  (0:a0-df,1:20-5f) */

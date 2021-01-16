@@ -232,7 +232,7 @@ int p;
 static char *fu_message[] = {
 	"+------------------------------------------------------------+",
 	"|                                                            |",
-	"|   F i l e  M a n a g e m e n t  U t i l i t y    Ver3.09   |",
+	"|   F i l e  M a n a g e m e n t  U t i l i t y    Ver3.20   |",
 	"|                                                            |",
 	"| Licenced Material of T.Tashiro                             |",
 	"| Reproduction, use, modification,disclosure otherwise than  |",

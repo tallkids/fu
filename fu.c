@@ -118,6 +118,8 @@
 		- 'tgz', '.tar.gz', '.zip' file support
 	Modify	T.Tashiro (Nifty PDC02432)	2017-07-12	Ver 3.10
 		- MacOS support
+	Modify	T.Tashiro (Nifty PDC02432)	2021-01-16	Ver 3.20
+		- UTF-8 support
 */
 /************************************************************************
 *									*
@@ -288,9 +290,11 @@ char **argv;
 			} else if ( arg[1] == 'k' ) {			/* use kanji code */
 				ascii = FALSE;
 			} else if ( arg[1] == 'e' ) {		/* use euc kanji code */
-				os_kj_code = 1;
+				os_kj_code = KJ_CODE_EUC;
 			} else if ( arg[1] == 's' ) {		/* use shift-jis kanji code */
-				os_kj_code = 0;
+				os_kj_code = KJ_CODE_SJIS;
+			} else if ( arg[1] == 'u' ) {		/* use utf-8 kanji code */
+				os_kj_code = KJ_CODE_UTF8;
 			} else fu_usage();
 		}
 	}
@@ -299,8 +303,9 @@ char **argv;
 	extern int optind;
 
 	err = FALSE;
-	while ( ( c = getopt(argc,argv,"akes") ) != -1 ) {
+	while ( ( c = getopt(argc,argv,"akesu") ) != -1 ) {
 		switch ( c ) {
+
 			case 'a' :
 				ascii = TRUE;
 				break;
@@ -308,10 +313,13 @@ char **argv;
 				ascii = FALSE;
 				break;
 			case 'e' :
-				os_kj_code = 1;		/* use euc code */
+				os_kj_code = KJ_CODE_EUC;	/* use euc code */
 				break;
 			case 's' :
-				os_kj_code = 0;		/* use shift jis */
+				os_kj_code = KJ_CODE_SJIS;	/* use shift jis */
+				break;
+			case 'u' :
+				os_kj_code = KJ_CODE_UTF8;	/* use utf-8 code */
 				break;
 			default :
 				err = TRUE;
@@ -443,7 +451,7 @@ set_sc_column()
 
 	max_width = SCMD3_COLUMN;
 	for ( c = 0 ; c < dpc ; c++ ) {
-		if ( (ln = strlen(fent[c].d_name) + 3) > max_width ) max_width = ln;
+		if ( (ln = kj_width_str(fent[c].d_name) + 3) > max_width ) max_width = ln;
 	}
 	sc_column[3] = (max_width > X_WIDTH - 2) ? X_WIDTH - 2 : max_width ;
 
@@ -633,7 +641,7 @@ dsp_com_mes()
 	xt_loc(0,DSP_ROW+1);
 	xt_reverse();
 	if ( TITLEMINX <= X_WIDTH ) {
-		sprintf(buf,"== File Management Utility Ver.3.10 ");
+		sprintf(buf,"== File Management Utility Ver.3.20 ");
 		for ( c = strlen(buf) ; c < X_WIDTH - 13 ; c++ ) buf[c] = '=';
 		buf[c] = '\0';
 		strcat(buf," T.Tashiro ==");
@@ -797,13 +805,16 @@ int cp,revflg;
 	if ( sc_mode == 3 ) fn_c = sc_column[sc_mode] - 3;
 	else fn_c = 14;
 	strcpy(buf2,fent[cp].d_name);
-	for ( c = c2 = 0 ; c < fn_c ; c2++ ) {
-		if ( buf2[c2] == '\0' ) {
+	for ( c = c2 = 0 ; c < fn_c ; ) {
+		if ( buf2[c2] == '\0' || (c + kj_width(buf2 + c2)) > fn_c ) {
 			buf2[c2] = ' ';
 			buf2[c2+1] = '\0';
+			c++;
+			c2++;
+		} else {
+			c += kj_width(buf2 + c2);
+			c2 += kj_lenc(buf2[c2]);
 		}
-		if ( os_kj_code != 0 && is_kana(buf2[c2]) ) ++c2;
-		c++;
 	}
 	buf2[c2] = '\0';
 	strcat(buf,buf2);

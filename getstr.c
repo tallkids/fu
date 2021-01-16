@@ -171,40 +171,116 @@ int x;
 gstr_key(ky,x)
 int ky,x;
 {
-	int c,ln,ky2,cn;
+	int c,ln,cn;
+	char tmp[10];
 
-	cn = 1;
-	if ( is_kan1(ky) ) {
-		ky2 = func_in(TRUE,x);
-		++cn;
+	cn = 0;
+	tmp[cn++] = ky;
+	c = kj_lenc(ky);
+	while ( --c > 0 ) {
+		// read continuous kanji code at once
+		tmp[cn++] = func_in(TRUE,x);
 	}
 	if ( (ln = strlen(bf)) < bfmax-cn ) {
+		// make rooms to store input data
 		for ( c = ln ; c >= cp ; c-- ) bf[c+cn] = bf[c];
-		bf[cp] = ky;
-		if ( cn > 1 ) bf[cp+1] = ky2;
+
+		// store input key data
+		for ( c = 0 ; c < cn ; c++ ) bf[cp+c] = tmp[c];
+
+		// redraw string input area
 		gstr_flush(x);
 		cp += cn;
-		if ( cn > 1 && is_kana(ky) ) cn = 1;
+
+		// get character width
+		cn = kj_width(tmp);
+
+		// cursor move forward
 		if ( x ) xt_cur_forward(cn);
 		else t_cur_forward(cn);
 	}
 }
 
+gstr_ins(str,x,escape_blank)
+char *str;
+int x;
+int escape_blank;
+{
+	int c,c2,ln,cn,ky,w;
+
+	// calculate length of insert string
+	if ( escape_blank ) {
+		// insert back slash before blank
+		cn = c = 0;
+		while ( str[c] != '\0' ) {
+			if ( str[c] == ' ' ) ++cn;
+			ln = kj_lenc(str[c]);
+			c += ln;
+			cn += ln;
+		}
+	} else cn = strlen(str);
+
+	if ( (ln = strlen(bf)) < bfmax-cn ) {
+		// make rooms to store input data
+		for ( c = ln ; c >= cp ; c-- ) bf[c+cn] = bf[c];
+
+		// store input key data
+		for ( c = 0, c2 = cp ; str[c] != '\0' ; ) {
+			if ( escape_blank && str[c] == ' ' ) {
+				bf[c2++] = '\\';
+			}
+			w = kj_lenc(str[c]);
+			while ( w-- > 0 ) {
+				bf[c2++] = str[c++];
+			}
+		}
+
+		// redraw string input area
+		gstr_flush(x);
+
+		// get character width
+		for ( c = cp, w = 0 ; c < cp + cn ; c += kj_lenc(bf[c]) )
+			w += kj_width(bf + c);
+		cp += cn;
+
+		// cursor move forward
+		if ( x ) xt_cur_forward(w);
+		else t_cur_forward(w);
+	}
+}
+
+
 gstr_bs(x)
 int x;
 {
-	int c,cn,cn2;
+	int c,cn,w;
 
 	if ( cp > 0 ) {
+		// check the break point of Kanji code
 		cn = 1;
-		if ( cp > 1 && is_kan_str(bf,cp-2) ) cn = 2;
-		if ( cn > 1 && !is_kana(bf[cp-2]) ) cn2 = 2;	/* for euc kana */
-		else cn2 = 1;
+		while ( cp - cn > 0 && is_kan_str(bf, cp - cn) ) ++cn;
+
+		// get width of the code
+		w = kj_width(bf + cp - cn);
+
+		if ( cp - cn > 0 && w <= 0 ) {	// this is combined character. let's delete one more character
+			++cn;
+			while ( cp - cn > 0 && is_kan_str(bf, cp - cn) ) ++cn;
+			w = kj_width(bf + cp - cn);
+		}
+
+		// delete the character codes at once
 		for ( c = cp ; bf[c] != '\0' ; c++ ) bf[c-cn] = bf[c];
 		bf[c-cn] = '\0';
+
+		// move current buffer position
 		cp -= cn;
-		if ( x ) xt_cur_backward(cn2);
-		else t_cur_backward(cn2);
+
+		// move cursor backward
+		if ( x ) xt_cur_backward(w);
+		else t_cur_backward(w);
+
+		// redraw string input area
 		gstr_flush(x);
 	}
 }
@@ -216,9 +292,20 @@ int x;
 
 	ln = strlen(bf);
 	if ( cp < ln ) {
-		cn = 1;
-		if ( cp < ln - 1 && is_kan_str(bf,cp) ) cn = 2;
+		// get character code length
+		cn = kj_lenc(bf[cp]);
+
+		if ( cp + cn < ln ) {
+			// check if next code is combined character code?
+			if ( kj_width(bf + cp + cn) <= 0 ) {
+				cn += kj_lenc(bf[cp + cn]);
+			}
+		}
+
+		// delete 'cn' character codes
 		for ( c = cp ; c < ln-cn+1 ; c++ ) bf[c] = bf[c+cn];
+
+		// redraw string input area
 		gstr_flush(x);
 	}
 }
@@ -226,49 +313,81 @@ int x;
 gstr_left(x)
 int x;
 {
-	int cn;
+	int c,cn,w;
 
 	if ( cp > 0 ) {
+		// check the break point of Kanji code
 		cn = 1;
-		if ( cp > 1 && is_kan_str(bf,cp-2) ) cn = 2;
+		while ( cp - cn > 0 && is_kan_str(bf, cp - cn) ) ++cn;
+
+		// get width of the code
+		w = kj_width(bf + cp - cn);
+
+		if ( cp - cn > 0 && w <= 0 ) {	// this is combined character. let's delete one more character
+			++cn;
+			while ( cp - cn > 0 && is_kan_str(bf, cp - cn) ) ++cn;
+			w = kj_width(bf + cp - cn);
+		}
+
+		// move current buffer position
 		cp -= cn;
-		if ( cn > 1 && is_kana(bf[cp]) ) cn = 1;	/* for euc kana */
-		if ( x ) xt_cur_backward(cn);
-		else t_cur_backward(cn);
+
+		// move cursor backward
+		if ( x ) xt_cur_backward(w);
+		else t_cur_backward(w);
 	}
 }
 
 gstr_right(x)
 int x;
 {
-	int cn;
+	int c,ln,cn,w;
 
-	if ( cp < strlen(bf) ) {
-		cn = 1;
-		if ( is_kan1(bf[cp]) ) cn = 2;
+	ln = strlen(bf);
+	if ( cp < ln ) {
+		// get character code length and width
+		cn = kj_lenc(bf[cp]);
+		w = kj_width(bf + cp);
+
+		if ( cp + cn < ln ) {
+			// check if next code is combined character code?
+			if ( kj_width(bf + cp + cn) <= 0 ) {
+				cn += kj_lenc(bf[cp + cn]);
+			}
+		}
+
+		// move current buffer position
 		cp += cn;
-		if ( cn > 1 && is_kana(bf[cp-cn]) ) cn = 1;	/* for euc kana */
-		if ( x ) xt_cur_forward(cn);
-		else t_cur_forward(cn);
+
+		// move cursor forward
+		if ( x ) xt_cur_forward(w);
+		else t_cur_forward(w);
 	}
 }
 
 gstr_up(x)
 int x;
 {
-	int c,l;
+	int c,w;
 
 	if ( hc > 0 ) {
-		if ( os_kj_code != 0 ) {	/* if euc code */
-			l = cp;
-			for ( c = 0 ; c < l ; c++ )
-				if ( (bf[c] & 0xff) == 0x8e ) --cp;
+		// calculate current cursor position
+		w = c = 0;
+		while ( c < cp ) {
+			w += kj_width(bf + c);
+			c += kj_lenc(bf[c]);
 		}
-		if ( x ) xt_cur_backward(cp);
-		else t_cur_backward(cp);
+
+		// move cursor to the top of string input area
+		if ( x ) xt_cur_backward(w);
+		else t_cur_backward(w);
+
+		// get one string from history buffer
 		--hc;
 		strncpy(bf,hist[hc],bfmax-1);
 		bf[bfmax - 1] = '\0';
+
+		// draw new string
 		if ( x ) {
 			xt_puts(bf);
 			xt_erase_line();
@@ -276,6 +395,8 @@ int x;
 			t_puts(bf);
 			t_erase_line();
 		}
+
+		// setup new current buffer position
 		cp = strlen(bf);
 	}
 }
@@ -283,16 +404,21 @@ int x;
 gstr_down(x)
 int x;
 {
-	int c,l;
+	int c,w;
 
 	if ( hc < hcn ) {
-		if ( os_kj_code != 0 ) {	/* if euc code */
-			l = cp;
-			for ( c = 0 ; c < l ; c++ )
-				if ( (bf[c] & 0xff) == 0x8e ) --cp;
+		// calculate current cursor position
+		w = c = 0;
+		while ( c < cp ) {
+			w += kj_width(bf + c);
+			c += kj_lenc(bf[c]);
 		}
-		if ( x ) xt_cur_backward(cp);
-		else t_cur_backward(cp);
+
+		// move cursor to the top of string input area
+		if ( x ) xt_cur_backward(w);
+		else t_cur_backward(w);
+
+		// get one string from history buffer
 		++hc;
 		if ( hc < hcn ) {
 			strncpy(bf,hist[hc],bfmax-1);
@@ -300,6 +426,8 @@ int x;
 		} else {
 			bf[0] = '\0';
 		}
+
+		// draw new string
 		if ( x ) {
 			xt_puts(bf);
 			xt_erase_line();
@@ -307,6 +435,8 @@ int x;
 			t_puts(bf);
 			t_erase_line();
 		}
+
+		// setup new current buffer position
 		cp = strlen(bf);
 	}
 }
@@ -314,30 +444,47 @@ int x;
 gstr_flush(x)
 int x;
 {
-	int c,l;
-	int ln,cn;
+	int c,cn,w,w2;
 
-	cn = 0;
-	if ( cp > 0 && is_kan_str(bf,cp-1) ) cn = 1;
-	ln = strlen(bf+cp) + cn;
+	cn = w = 0;
+	if ( cp > 0 ) {
+		// check the break point of Kanji code
+		cn = 1;
+		while ( cp - cn > 0 && is_kan_str(bf, cp - cn) ) ++cn;
+
+		// get width of the code
+		w = kj_width(bf + cp - cn);
+
+		if ( cp - cn > 0 && w <= 0 ) {	// this is combined character
+			++cn;
+			while ( cp - cn > 0 && is_kan_str(bf, cp - cn) ) ++cn;
+			w = kj_width(bf + cp - cn);
+		}
+	}
+
+	// move cursor backward
 	t_clrcur();
 	if ( cn > 0 ) {
-		if ( x ) xt_cur_backward(cn);
-		else t_cur_backward(cn);
+		if ( x ) xt_cur_backward(w);
+		else t_cur_backward(w);
 	}
-	l = ln;
-	if ( os_kj_code != 0 ) {	/* if euc code */
-		for ( c = 0 ; c < ln ; c++ )
-			if ( (bf[cp-cn+c] & 0xff) == 0x8e ) --l;
+
+	// calculate cursor original position
+	c = w2 = 0;
+	while ( bf[cp + c] != '\0' ) {
+		w2 += kj_width(bf + cp + c);
+		c += kj_lenc(bf[cp + c]);
 	}
+
+	// redraw string and move cursor to original position
 	if ( x ) {
 		xt_puts(bf+cp-cn);
 		xt_erase_line();
-		xt_cur_backward(l-cn);
+		xt_cur_backward(w2);
 	} else {
 		t_puts(bf+cp-cn);
 		t_erase_line();
-		t_cur_backward(l-cn);
+		t_cur_backward(w2);
 	}
 	t_dspcur();
 
@@ -410,7 +557,7 @@ int
 print_candidate(xwin)
 int xwin;
 {
-	int c, c2, w, x;
+	int c, c2, w, w2, x;
 	int maxlen;
 
 	t_clrcur();
@@ -418,8 +565,8 @@ int xwin;
 	// determine maximum name length
 	maxlen = 0;
 	for ( c = 0 ; c < ncandidate ; c++ ) {
-		if ( strlen(candidate_list[c]) > maxlen ) {
-			maxlen = strlen(candidate_list[c]);
+		if ( (w = kj_width_str(candidate_list[c])) > maxlen ) {
+			maxlen = w;
 		}
 	}
 
@@ -439,7 +586,7 @@ int xwin;
 			t_puts(" ");
 		}
 		t_puts(candidate_list[c]);
-		x = strlen(candidate_list[c]);
+		x = kj_width_str(candidate_list[c]);
 	}
 	t_puts("\015\n");
 
@@ -448,7 +595,14 @@ int xwin;
 	if ( xwin ) xt_puts(bf);
 	else t_puts(bf);
 	xt_erase_line();
-	xt_cur_backward(strlen(bf) - cp);
+
+	// calculate cursor original position
+	c = w2 = 0;
+	while ( bf[cp + c] != '\0' ) {
+		w2 += kj_width(bf + cp + c);
+		c += kj_lenc(bf[cp + c]);
+	}
+	xt_cur_backward(w2);
 
 	t_dspcur();
 
@@ -462,7 +616,7 @@ int x;
 {
 	DIR *dirp;
 	struct dirent *dir;
-	int c,st,en,ln,all_ln,only_one;
+	int c,c2,st,en,ln,all_ln,only_one,w;
 	char fn[1024],path[1024],*end_path;
 	char candidate[1024];
 	struct stat st_buf;
@@ -471,20 +625,20 @@ int x;
 
 	/* extract incompleted pathname which user specified */
 	st = 0;
-	for ( c = 0 ; bf[c] != '\0' && c < cp ; c++ ) {
-		if ( bf[c] == ' ' || bf[c] == '|' || bf[c] == '>'
+	for ( c = 0 ; bf[c] != '\0' && c < cp ; ) {
+		if ( bf[c] == '\\' && c+1 < cp && bf[c+1] != '\0' ) ++c;
+		else if ( bf[c] == ' ' || bf[c] == '|' || bf[c] == '>'
 			|| bf[c] == '<' || bf[c] == '"' || bf[c] == '\'' || bf[c] == '@' ) {
 			st = c + 1;
 		}
-		if ( is_kan1(bf[c]) ) ++c;
+		c += kj_lenc(bf[c]);
 	}
 	en = st;
-	for ( c = 0 ; bf[en] != '\0' && en < cp ; en++, c++ ) {
-		fn[c] = bf[en];
-		if ( is_kan1(bf[en]) ) {
-			++c;
-			++en;
-			fn[c] = bf[en];
+	for ( c = 0 ; bf[en] != '\0' && en < cp ; ) {
+		if ( bf[en] == '\\' ) en++;
+		if ( bf[en] != '\0' ) {
+			c2 = kj_lenc(bf[en]);
+			while ( c2-- > 0 ) fn[c++] = bf[en++];
 		}
 	}
 	fn[c] = '\0';
@@ -507,9 +661,17 @@ int x;
 				add_candidate(pw->pw_name);
 				if ( *candidate != '\0' || !only_one ) {
 					/* check how many characters has been matched to the current candidate */
-					for ( c = 0 ; pw->pw_name[c] != '\0'
-						 && pw->pw_name[c] == candidate[c] ; c++ );
-
+					for ( c = 0 ; pw->pw_name[c] != '\0' ; ) {
+						w = kj_lenc(pw->pw_name[c]);
+						c2 = 0;
+						while ( w > 0 ) {
+							if ( pw->pw_name[c+c2] != candidate[c+c2] ) break;
+							--w;
+							++c2;
+						}
+						if ( w > 0 ) break;
+						c += c2;
+					}
 					if ( c < ln-1 ) {
 						*candidate = '\0';
 						break;
@@ -539,9 +701,7 @@ int x;
 
 		/* insert filename */
 		all_ln = strlen(candidate);
-		for ( c = ln-1 ; c < all_ln ; c++ ) {
-			gstr_key(candidate[c],x);
-		}
+		if ( ln - 1 < all_ln ) gstr_ins(candidate + ln - 1, x, TRUE);
 		if ( only_one ) {
 			gstr_key('/',x);
 		}
@@ -563,9 +723,17 @@ int x;
 			add_candidate(dir->d_name);
 			if ( *candidate != '\0' || !only_one ) {
 				/* check how many characters has been matched to the current candidate */
-				for ( c = 0 ; dir->d_name[c] != '\0'
-					 && dir->d_name[c] == candidate[c] ; c++ );
-
+				for ( c = 0 ; dir->d_name[c] != '\0' ; ) {
+					w = kj_lenc(dir->d_name[c]);
+					c2 = 0;
+					while ( w > 0 ) {
+						if ( dir->d_name[c+c2] != candidate[c+c2] ) break;
+						--w;
+						++c2;
+					}
+					if ( w > 0 ) break;
+					c += c2;
+				}
 				if ( c < ln ) {
 					*candidate = '\0';
 					break;
@@ -595,9 +763,7 @@ int x;
 
 	/* insert filename */
 	all_ln = strlen(candidate);
-	for ( c = ln ; c < all_ln ; c++ ) {
-		gstr_key(candidate[c],x);
-	}
+	if ( ln < all_ln ) gstr_ins(candidate + ln, x, TRUE);
 	if ( only_one ) {
 		/* check if this file is the directory */
 		/* if Yes then append '/' otherwise append ' ' to the end of string */
@@ -619,7 +785,7 @@ get_pathname(fn,path)
 char *fn;
 char *path;
 {
-	int c;
+	int c, c2;
 	char *p,*end_path;
 
 	p = end_path = NULL;
@@ -629,9 +795,10 @@ char *path;
 			p = path + c;
 			end_path = fn + c + 1;
 		}
-		if ( is_kan1(fn[c]) ) {
-			path[c] = fn[c];
+		c2 = kj_lenc(fn[c]);
+		while ( --c2 > 0 ) {
 			++c;
+			path[c] = fn[c];
 		}
 	}
 	if ( p != NULL ) {
@@ -650,35 +817,15 @@ char *path;
 is_kan1(dt)
 int dt;
 {
-	dt &= 0xff;
-	if ( os_kj_code == 0 ) {	/* use shift jis */
-		if ( dt >= 0x81 && dt <= 0x9f ) return TRUE;
-		if ( dt >= 0xe0 && dt <= 0xea ) return TRUE;
-		return FALSE;
-	} else {			/* use euc code */
-		if ( dt & 0x80 ) return TRUE;
-		else return FALSE;
-	}
-}
-
-is_kan2(dt)
-int dt;
-{
-	dt &= 0xff;
-	if ( os_kj_code == 0 ) {	/* use shift-jis */
-		if ( dt >= 0x3e && dt <= 0xfd ) return TRUE;
-		return FALSE;
-	} else {			/* use euc code */
-		if ( dt & 0x80 ) return TRUE;
-		else return FALSE;
-	}
+	if ( kj_lenc(dt) > 1 ) return TRUE;
+	return FALSE;
 }
 
 is_kana(dt)
 int dt;
 {
 	dt &= 0xff;
-	if ( os_kj_code == 0 ) {
+	if ( os_kj_code == KJ_CODE_SJIS ) {
 		if ( dt >= 0xa1 && dt <= 0xdf ) return TRUE;
 	} else {
 		if ( dt == 0x8e ) return TRUE;
@@ -690,30 +837,105 @@ is_norm(dt)
 int dt;
 {
 	dt &= 0xff;
-	if ( os_kj_code == 0 ) {	/* use shift-jis */
+	if ( os_kj_code == KJ_CODE_SJIS ) {	/* use shift-jis */
 		if ( dt == '\0' ) return FALSE;
 		if ( dt >= 0x81 && dt <= 0x9f ) return FALSE;
 		if ( dt >= 0xe0 && dt <= 0xea ) return FALSE;
 		if ( dt >= 0xa1 && dt <= 0xdf ) return FALSE;
 		return TRUE;
-	} else {			/* use euc code */
+	} else {				/* use euc or / utf-8 code */
 		if ( dt == '\0' ) return FALSE;
 		if ( dt & 0x80 ) return FALSE;
 		else return TRUE;
 	}
 }
 
+/*
+	check if the position is middle of continuous bytes of Kanji code    	    	    	
+ */
 is_kan_str(str,p)
 char *str;
 int p;
 {
-	int k,c;
+	int c, cn;
 
-	k = FALSE;
-	for ( c = 0 ; c <= p ; c++ ) {
-		if ( !k && is_kan1(str[c]) ) k = TRUE;
-		else k = FALSE;
+	c = 0;
+	while ( c < p ) {
+		// get length of the code
+		cn = kj_lenc(str[c]);
+
+		// if code has some bytes and specified position is the middle of continous bytes ?
+		if ( cn > 1 && c + cn > p ) return TRUE;
+
+		// move to next code
+		c += cn;
 	}
 
-	return k;
+	return FALSE;
+}
+
+int
+kj_lenc(dt)
+int dt;
+{
+	dt &= 0xff;
+	if ( os_kj_code == KJ_CODE_SJIS ) {		/* shift jis */
+		if ( dt >= 0x81 && dt <= 0x9f ) return 2;	/* 0x81 - 0x9f -> 2byte code */
+		if ( dt >= 0xe0 && dt <= 0xea ) return 2;	/* 0xe0 - 0xea -> 2byte code */
+		return 1;					/* other one is 1byte code */
+	
+	} else if ( os_kj_code == KJ_CODE_SJIS ) {	/* euc code */
+		if ( dt < 0x80 ) return 1;			/* 0x00 - 0x80 -> 1byte code */
+		return 2;					/* 0x81 - 0xff -> 2byte code */
+	} else if ( os_kj_code == KJ_CODE_UTF8 ) {	/* utf-8 code */
+		if ( dt < 0x80 ) return 1;			/* 0x00 - 0x7f -> 1byte code */
+		else if ( dt < 0xc0 ) return 1;			/* 0x80 - 0xbf -> 2nd or later char code */
+		else if ( dt < 0xe0 ) return 2;			/* 0xc0 - 0xdf -> 2byte code */
+		else if ( dt < 0xf0 ) return 3;			/* 0xe0 - 0xef -> 3byte code */
+		else if ( dt < 0xf8 ) return 4;			/* 0xf0 - 0xf7 -> 4byte code */
+		else if ( dt < 0xfc ) return 5;			/* 0xf8 - 0xfb -> 5byte code */
+		return 6;					/* 0xfc - 0xfd -> 6byte code */
+	}
+	return 0; /* kanji code error */
+}
+
+int
+kj_width_str(str)
+char *str;
+{
+	int c, w;
+
+	for ( c = w = 0 ; str[c] != '\0' ; c += kj_lenc(str[c]) ) {
+		w += kj_width(str + c);
+	}
+
+	return w;
+}
+
+int
+kj_width(str)
+char *str;
+{
+	int dt, dt2, dt3;
+
+	dt = *str & 0xff;
+	dt2 = *(str+1) & 0xff;
+	dt3 = *(str+2) & 0xff;
+	if ( os_kj_code == KJ_CODE_SJIS ) {		/* shift jis */
+		if ( dt >= 0x81 && dt <= 0x9f ) return 2;	/* 0x81 - 0x9f -> full width */
+		if ( dt >= 0xe0 && dt <= 0xea ) return 2;	/* 0xe0 - 0xea -> full width */
+		return 1;					/* other one is half width */
+	} else if ( os_kj_code == KJ_CODE_SJIS ) {	/* euc code */
+		if ( dt < 0x80 || dt == 0x8e ) return 1;	/* 0x00 - 0x80, 0x8e -> half width */
+		return 2;					/* 0x81 - 0xff -> full width */
+	} else if ( os_kj_code == KJ_CODE_UTF8 ) {	/* utf-8 code */
+		if ( dt < 0x80 ) return 1;			/* 0x00 - 0x7f -> half width */
+		else if ( dt == 0xe2 && dt2 == 0x80 && dt3 >= 0x98 && dt3 <= 0x9f  ) return 1;
+		else if ( dt == 0xef && dt2 == 0xbd && dt3 >= 0xa1  ) return 1;	/* 0xefbda1 - 0xefbdbf -> half width(kana) */
+		else if ( dt == 0xef && dt2 == 0xbe && dt3 <= 0x9f  ) return 1;	/* 0xefbe80 - 0xefbe9f -> half width(kana) */
+		else if ( dt == 0xe3 && dt2 == 0x82 && dt3 == 0x99 ) return 0;	/* 0xe38299 -> combine character(DAKUON) */
+		else if ( dt == 0xe3 && dt2 == 0x82 && dt3 == 0x9a ) return 0;	/* 0xe3829a -> combine character(HANDAKUON) */
+		return 2;					/* other one is full width */
+	}
+	return 0; /* kanji code error */
 }

@@ -111,8 +111,8 @@ char **argv;
 		exit(1);
 	}
 
-	if ( xfnj->min_byte1 > 0x21 ) fn_kj_code = 0;	/* shift-jis */
-	else fn_kj_code = 1;	/* jis code */
+	if ( xfnj->min_byte1 > 0x21 ) fn_kj_code = KJ_CODE_SJIS;	/* shift-jis */
+	else fn_kj_code = KJ_CODE_EUC;	/* jis code */
 
 	if ( xfnk->max_char_or_byte2 >= 0x80 ) fn_ka_code = 0;
 	else fn_ka_code = 1;
@@ -368,8 +368,8 @@ int ch;
 
 	ch2 = ch;
 	if ( kanji1 > 0 ) {
-		if ( os_kj_code == 0 ) {	/* shift jis */
-			if ( fn_kj_code == 0 ) {
+		if ( os_kj_code == KJ_CODE_SJIS ) {	/* shift jis */
+			if ( fn_kj_code == KJ_CODE_SJIS ) {
 				kk[0] = kanji1;
 				kk[1] = ch2;
 			} else {
@@ -392,7 +392,7 @@ int ch;
 				kanji1 = -1;
 				xxpos += xchw;
 			} else {
-				if ( fn_kj_code == 1 ) {
+				if ( fn_kj_code == KJ_CODE_EUC ) {
 					kk[0] = kanji1 & 0x7f;
 					kk[1] = ch2 & 0x7f;
 				} else {
@@ -451,7 +451,7 @@ char *str;
 		if ( is_kana(*str) ) {
 			cn = 1;
 			p = p2 = str++;
-			if ( os_kj_code != 0 ) {
+			if ( os_kj_code == KJ_CODE_EUC ) {
 				*p2 = *str;
 				++str;
 			}
@@ -460,7 +460,7 @@ char *str;
 			while ( is_kana(*str) ) {
 				++str;
 				++cn;
-				if ( os_kj_code != 0 ) {
+				if ( os_kj_code == KJ_CODE_EUC ) {
 					*p2 = *str;
 					++str;
 				}
@@ -476,12 +476,12 @@ char *str;
 			if ( *(str+1) != '\0' ) {
 				f = *str;
 				s = *(str+1);
-				if ( os_kj_code == 1 ) {
+				if ( os_kj_code == KJ_CODE_EUC ) {
 					f &= 0x7f;
 					s &= 0x7f;
-					if ( fn_kj_code == 0 )
+					if ( fn_kj_code == KJ_CODE_SJIS )
 						jtosj(&f,&s);
-				} else if ( os_kj_code == 0 && fn_kj_code == 1 ) {
+				} else if ( os_kj_code == KJ_CODE_SJIS && fn_kj_code == KJ_CODE_EUC ) {
 					sjtoj(&f,&s);
 				}
 				*str = f;
@@ -495,12 +495,12 @@ char *str;
 					}
 					f = *str;
 					s = *(str+1);
-					if ( os_kj_code == 1 ) {
+					if ( os_kj_code == KJ_CODE_EUC ) {
 						f &= 0x7f;
 						s &= 0x7f;
-						if ( fn_kj_code == 0 )
+						if ( fn_kj_code == KJ_CODE_SJIS )
 							jtosj(&f,&s);
-					} else if ( os_kj_code == 0 && fn_kj_code == 1 ) {
+					} else if ( os_kj_code == OS_KJ_SJIS && fn_kj_code == KJ_CODE_EUC ) {
 						sjtoj(&f,&s);
 					}
 					*str = f;

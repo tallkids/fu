@@ -168,6 +168,10 @@
 #define NORM_DISP		FALSE
 #define REV_DISP		TRUE
 
+#define KJ_CODE_SJIS		0
+#define KJ_CODE_EUC		1
+#define KJ_CODE_UTF8		2
+
 /* Definition for func_cmd.flg */
 #define FUNC_SCREEN_FLAG	1	/* Query Before and After Cmmand Execution */
 #define ALL_FILE_STAY		2	/* This Command Not Chane File Status */
@@ -299,6 +303,14 @@ extern long now;		/* now time */
 extern int shell_pid;		/* shell process-id */
 extern int shell_pipe[];	/* shell - X interface pipeline */
 #endif
+
+extern int get_str();
+#if XWINDOW
+extern int xget_str();
+#endif
+
+extern int kj_lenc();
+extern int kj_width();
 
 extern char *skip_sp();
 extern int f_nop();
