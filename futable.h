@@ -51,18 +51,22 @@ struct KEY_FUNC_TAG key_func[MAX_KEY_FUNC] = {
 #ifdef SIGWINCH
 	{ KEY_SIGWINCH,	NULL,	FUNC_WINCH,	0 },
 #endif
+	{ 0,		"\001",		FUNC_HOME,	0 },
 	{ 0,		"\002",		FUNC_LEFT,	0 },
 	{ 0,		"\004",		FUNC_DEL,	0 },
+	{ 0,		"\005",		FUNC_END,	0 },
 	{ 0,		"\006",		FUNC_RIGHT,	0 },
 	{ 0,		"\010",		FUNC_BS,	0 },
 	{ 0,		"\011",		FUNC_FNEXPAND,	0 },
 	{ 0,		"\012",		FUNC_RET,	0 },
+	{ 0,		"\013",		FUNC_KILL,	0 },
 	{ 0,		"\014",		FUNC_RDRAW,	0 },
 	{ 0,		"\015",		FUNC_RET,	0 },
 	{ 0,		"\016",		FUNC_DOWN,	0 },
 	{ 0,		"\020",		FUNC_UP,	0 },
 	{ 0,		"\026",		FUNC_S_DOWN,	0 },
 	{ 0,		"\030\003",	FUNC_QUIT,	0 },
+	{ 0,		"\031",		FUNC_PASTE,	0 },
 	{ 0,		"\032",		FUNC_S_UP,	0 },
 	{ 0,		"\177",		FUNC_BS,	0 },
 	{ 0,		" ",	FUNC_SELECT,	0 },
@@ -152,7 +156,11 @@ struct FUNC_CMD_TAG func_cmd[MAX_FUNC_CMD] = {
 	{ f_backdir,	NULL,		0 },	/* FUNC_BACKDIR	(func_backdir) */
 	{ f_forwdir,	NULL,		0 },	/* FUNC_FORWDIR	(func_forwdir) */
 	{ f_winch,	NULL,		0 },	/* FUNC_WINCH	(func_winch) */
-	{ NULL,		"",		1 },	/* FUNC_FNEXPAND(func_fn_expand) */
+	{ NULL,		"",		0 },	/* FUNC_FNEXPAND(func_fn_expand) */
+	{ NULL,		"",		0 },	/* FUNC_KILL    (func_fn_kill) */
+	{ NULL,		"",		0 },	/* FUNC_PASTE   (func_fn_paste) */
+	{ k_home,	"",		0 },	/* FUNC_HOME    (func_fn_home) */
+	{ k_end,	"",		0 },	/* FUNC_END     (func_fn_end) */
 	{ NULL,		NULL,		-1 }
 };
 
@@ -203,6 +211,10 @@ char *fnc_name[] = {
 	"func_forwdir",
 	"func_winch",
 	"func_fn_expand",
+	"func_kill",
+	"func_paste",
+	"func_home",
+	"func_end",
 	NULL
 };
 

@@ -120,6 +120,7 @@
 		- MacOS support
 	Modify	T.Tashiro (Nifty PDC02432)	2021-01-16	Ver 3.20
 		- UTF-8 support
+		- add FUNC_KILL, FUNC_PASTE, FUNC_HOME and FUNC_END
 */
 /************************************************************************
 *									*
@@ -731,7 +732,7 @@ com_exe(fc)
 int fc;
 {
 	int st;
-	char temp[1024];
+	char temp[MAX_STR];
 
 	if ( func_cmd[fc].func != NULL ) (*func_cmd[fc].func)();
 	else {

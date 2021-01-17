@@ -119,6 +119,10 @@
 #define FUNC_FORWDIR	42
 #define FUNC_WINCH	43
 #define FUNC_FNEXPAND	44
+#define FUNC_KILL	45
+#define FUNC_PASTE	46
+#define FUNC_HOME	47
+#define FUNC_END	48
 
 #if MINIX
 #  define FILE_ENT		512
@@ -131,6 +135,7 @@
 #  define MAX_FUNC_CMD		100
 #  define MAX_DNAME		19
 #  define MAX_MCOM		40
+#  define MAX_STR		1024
 #  define HIST_CN		15
 #  define DIR_HIST_CN		10
 #else
@@ -144,6 +149,7 @@
 #  define MAX_FUNC_CMD		200
 #  define MAX_DNAME		256
 #  define MAX_MCOM		40
+#  define MAX_STR		1024
 #  define HIST_CN		30
 #  define DIR_HIST_CN		30
 #endif
@@ -324,6 +330,8 @@ extern int k_up();
 extern int k_down();
 extern int k_sup();
 extern int k_sdown();
+extern int k_home();
+extern int k_end();
 extern int f_rdraw();
 extern int k_all_sel();
 extern int f_delete();

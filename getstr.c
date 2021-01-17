@@ -51,6 +51,8 @@ static int many_candidate = FALSE;
 static char *prompt1, *prompt2;
 int need_redraw = FALSE;
 
+static char kill_buf[MAX_STR] = { '\0' };
+
 int
 get_str(buf,bufmax,p1,p2)
 char *buf;
@@ -127,6 +129,14 @@ char *p1, *p2;
 				gstr_down(x);
 			} else if ( ky == FUNC_FNEXPAND ) {
 				gstr_fn_expand(x);
+			} else if ( ky == FUNC_KILL ) {
+				gstr_kill(x);
+			} else if ( ky == FUNC_PASTE ) {
+				if ( kill_buf[0] != '\0' ) gstr_ins(kill_buf,x,FALSE);
+			} else if ( ky == FUNC_HOME ) {
+				gstr_home(x);
+			} else if ( ky == FUNC_END ) {
+				gstr_end(x);
 			}
 		} else if ( ky == KEY_ESC2 ) {
 			t_clrcur();
@@ -441,6 +451,75 @@ int x;
 	}
 }
 
+/*
+ *  kill string after cursor position and copy it to kill buffer
+ */
+gstr_kill(x)
+int x;
+{
+	int ln;
+
+	ln = strlen(bf);
+	if ( cp < ln ) {  // are there any string?
+		// move string after current cursor position to kill buffer
+		strcpy(kill_buf, bf + cp);
+		bf[cp] = '\0';
+
+		// redraw string input area
+		gstr_flush(x);
+	}
+}
+
+/*
+ *  move cursor to the top of string
+ */
+gstr_home(x)
+int x;
+{
+	int c,w;
+
+	if ( cp > 0 ) {
+		// get width to the cursor position
+		for ( c = w = 0 ; c < cp ; c += kj_lenc(bf[c]) ) {
+			w += kj_width(bf + c);
+		}
+
+		// move current buffer position to the top
+		cp = 0;
+
+		// move cursor to the top of string
+		if ( x ) xt_cur_backward(w);
+		else t_cur_backward(w);
+	}
+}
+
+/*
+ *  move cursor to the bottom of string
+ */
+gstr_end(x)
+int x;
+{
+	int c,ln,w;
+
+	ln = strlen(bf);
+	if ( cp < ln ) {
+		// get width to the bottom of the string
+		for ( c = cp, w = 0 ; c < ln ; c += kj_lenc(bf[c]) ) {
+			w += kj_width(bf + c);
+		}
+
+		// move current cursor position to the bottom of string
+		cp = ln;
+
+		// move cursor forward
+		if ( x ) xt_cur_forward(w);
+		else t_cur_forward(w);
+	}
+}
+
+/*
+ *  redraw string after cursor position
+ */
 gstr_flush(x)
 int x;
 {

@@ -40,7 +40,7 @@
 
 f_exec()
 {
-	char temp[1024];
+	char temp[MAX_STR];
 
 	if ( !is_file_norm(curp) ) return;
 	strcpy(temp,"./");
@@ -91,7 +91,7 @@ int fnc_flg;
 	f = FALSE;
 	while ( TRUE ) {
 		if ( sc_flg ) {
-			if ( get_str(temp,1000,"Shell"," > ") != 0 || *temp == '\0' )
+			if ( get_str(temp,MAX_STR,"Shell"," > ") != 0 || *temp == '\0' )
 				break;
 			t_puts("\015\012");
 		}

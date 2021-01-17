@@ -100,6 +100,14 @@ mac:
 	"MCFLAGS=-g -w -Wno-return-type -DMACOS=1 -DI386BSD=1" \
 	"LIB=-lcurses"
 #
+mac-x:
+	make targets \
+	"CC=cc" "LD=cc" \
+	"TARGET=xfu" \
+	"XOBJ=xtext.o xkey.o" \
+	"MCFLAGS=-g -w -Wno-return-type -DMACOS=1 -DI386BSD=1 -DXWINDOW=1" \
+	"LIB=-lcurses -lX11"
+#
 panix:
 	make targets \
 	"CC=gcc" "LD=gcc" \

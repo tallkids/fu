@@ -390,6 +390,30 @@ k_sdown()
 	}
 }
 
+k_home()
+{
+	if ( dp - DSP_CN >= 0 ) {
+		dp = curp = 0;
+		dsp_fl();
+		dsp_com_mes();
+	} else {
+		curp = 0;
+	}
+	return;
+}
+
+k_end()
+{
+	if ( dp + DSP_CN < dpc ) {
+		dp = (dpc / (DSP_CN-1)) * DSP_CN;
+		curp = ( dpc - 1 < 0 )?0:( dpc - 1 );
+		dsp_fl();
+		dsp_com_mes();
+	} else {
+		curp = ( dpc - 1 < 0 )?0:( dpc - 1 );
+	}
+}
+
 k_sp()
 {
 	int ft;
@@ -410,7 +434,7 @@ k_sp()
 k_ret()
 {
 	int ft,c,arc_type;
-	char temp[1024];
+	char temp[MAX_STR];
 
 	ft = fent[curp].st_mode & FILE_TYPE;
 	if ( ft == FILE_DIR ) change_dir();
