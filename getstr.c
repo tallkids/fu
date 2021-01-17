@@ -273,7 +273,7 @@ int x;
 		// get width of the code
 		w = kj_width(bf + cp - cn);
 
-		if ( cp - cn > 0 && w <= 0 ) {	// this is combined character. let's delete one more character
+		while ( cp - cn > 0 && w <= 0 ) {	// this is combined character. let's delete one more character
 			++cn;
 			while ( cp - cn > 0 && is_kan_str(bf, cp - cn) ) ++cn;
 			w = kj_width(bf + cp - cn);
@@ -298,18 +298,18 @@ int x;
 gstr_del(x)
 int x;
 {
-	int c,ln,cn;
+	int c,ln,cn,w;
 
 	ln = strlen(bf);
 	if ( cp < ln ) {
 		// get character code length
 		cn = kj_lenc(bf[cp]);
 
-		if ( cp + cn < ln ) {
+		while ( cp + cn < ln ) {
 			// check if next code is combined character code?
 			if ( kj_width(bf + cp + cn) <= 0 ) {
 				cn += kj_lenc(bf[cp + cn]);
-			}
+			} else break;
 		}
 
 		// delete 'cn' character codes
@@ -333,7 +333,7 @@ int x;
 		// get width of the code
 		w = kj_width(bf + cp - cn);
 
-		if ( cp - cn > 0 && w <= 0 ) {	// this is combined character. let's delete one more character
+		while ( cp - cn > 0 && w <= 0 ) {	// this is combined character. let's move one more character
 			++cn;
 			while ( cp - cn > 0 && is_kan_str(bf, cp - cn) ) ++cn;
 			w = kj_width(bf + cp - cn);
@@ -359,11 +359,11 @@ int x;
 		cn = kj_lenc(bf[cp]);
 		w = kj_width(bf + cp);
 
-		if ( cp + cn < ln ) {
+		while ( cp + cn < ln ) {
 			// check if next code is combined character code?
 			if ( kj_width(bf + cp + cn) <= 0 ) {
 				cn += kj_lenc(bf[cp + cn]);
-			}
+			} else break;
 		}
 
 		// move current buffer position
@@ -1000,21 +1000,42 @@ char *str;
 	dt = *str & 0xff;
 	dt2 = *(str+1) & 0xff;
 	dt3 = *(str+2) & 0xff;
-	if ( os_kj_code == KJ_CODE_SJIS ) {		/* shift jis */
-		if ( dt >= 0x81 && dt <= 0x9f ) return 2;	/* 0x81 - 0x9f -> full width */
-		if ( dt >= 0xe0 && dt <= 0xea ) return 2;	/* 0xe0 - 0xea -> full width */
-		return 1;					/* other one is half width */
-	} else if ( os_kj_code == KJ_CODE_SJIS ) {	/* euc code */
-		if ( dt < 0x80 || dt == 0x8e ) return 1;	/* 0x00 - 0x80, 0x8e -> half width */
-		return 2;					/* 0x81 - 0xff -> full width */
-	} else if ( os_kj_code == KJ_CODE_UTF8 ) {	/* utf-8 code */
-		if ( dt < 0x80 ) return 1;			/* 0x00 - 0x7f -> half width */
-		else if ( dt == 0xe2 && dt2 == 0x80 && dt3 >= 0x98 && dt3 <= 0x9f  ) return 1;
-		else if ( dt == 0xef && dt2 == 0xbd && dt3 >= 0xa1  ) return 1;	/* 0xefbda1 - 0xefbdbf -> half width(kana) */
-		else if ( dt == 0xef && dt2 == 0xbe && dt3 <= 0x9f  ) return 1;	/* 0xefbe80 - 0xefbe9f -> half width(kana) */
-		else if ( dt == 0xe3 && dt2 == 0x82 && dt3 == 0x99 ) return 0;	/* 0xe38299 -> combine character(DAKUON) */
-		else if ( dt == 0xe3 && dt2 == 0x82 && dt3 == 0x9a ) return 0;	/* 0xe3829a -> combine character(HANDAKUON) */
-		return 2;					/* other one is full width */
+	if ( os_kj_code == KJ_CODE_SJIS ) {		// shift jis
+		if ( dt >= 0x81 && dt <= 0x9f ) return 2;	// 0x81 - 0x9f -> full width
+		if ( dt >= 0xe0 && dt <= 0xea ) return 2;	// 0xe0 - 0xea -> full width
+		return 1;					// other one is half width
+	} else if ( os_kj_code == KJ_CODE_SJIS ) {	// euc code
+		if ( dt < 0x80 || dt == 0x8e ) return 1;	// 0x00 - 0x80, 0x8e -> half width
+		return 2;					// 0x81 - 0xff -> full width
+	} else if ( os_kj_code == KJ_CODE_UTF8 ) {	// utf-8 code
+		if ( dt < 0x80 ) return 1;			// 0x00 - 0x7f -> half width
+		else if ( dt == 0xcc ) return 0;			// 0xcc80 - 0xccbf -> combine character
+		else if ( dt == 0xcd && dt2 <= 0xaf ) return 0;		// 0xcd80 - 0xcdaf -> combine character
+		else if ( dt >= 0xc2 && dt <= 0xdf ) return 1;		// 0xc280 - 0xdfbf -> half width(except 0xcc80-0xcdaf)
+		else if ( dt == 0xe1 && dt2 >= 0xb4 && dt2 <= 0xb6
+			&& dt3 >= 0x80 && dt3 <= 0xbf ) return 1;	// 0xe1b480 - 0xe1b6bf -> half width
+		else if ( dt == 0xe1 && dt2 == 0xb7 ) return 0;		// 0xe1b780 - 0xe1b7bf -> combine character
+		else if ( dt == 0xe2 && dt2 >= 0x80 && dt2 <= 0x82
+			) return 1;					// 0xe28080 - 0xe282bf -> half width
+		else if ( dt == 0xe2 && dt2 == 0x83
+			&& dt3 >= 0x80 && dt3 <= 0x8f ) return 1;	// 0xe28380 - 0xe2838f -> half width
+		else if ( dt == 0xe2 && dt2 == 0x83
+			&& dt3 >= 0x90 && dt3 <= 0xbf ) return 0;	// 0xe28390 - 0xe283bf -> combine character
+		else if ( dt == 0xe2 && dt2 >= 0x84 && dt2 <= 0xaf
+			) return 1;					// 0xe28480 - 0xe2afbf -> half width
+		else if ( dt == 0xe3 && dt2 == 0x82
+			&& dt3 == 0x99 ) return 0;			// 0xe38299 -> combine character(DAKUON)
+		else if ( dt == 0xe3 && dt2 == 0x82
+			&& dt3 == 0x9a ) return 0;			// 0xe3829a -> combine character(HANDAKUON)
+		else if ( dt == 0xea && dt2 == 0x9c
+			&& dt3 >= 0x80 && dt3 <= 0x9f ) return 1;	// 0xea9c80 - 0xea9c9f -> half width
+		else if ( dt == 0xef && dt2 == 0xb8
+			&& dt3 >= 0xa0 && dt3 <= 0xaf ) return 0;	// 0xefb8a0 - 0xefb8af -> combine character
+		else if ( dt == 0xef && dt2 == 0xbd
+			&& dt3 >= 0xa1 ) return 1;			// 0xefbda1 - 0xefbdbf -> half width(kana)
+		else if ( dt == 0xef && dt2 == 0xbe
+			&& dt3 <= 0x9f ) return 1;			// 0xefbe80 - 0xefbe9f -> half width(kana)
+		return 2;					// other one maybe full width
 	}
 	return 0; /* kanji code error */
 }
