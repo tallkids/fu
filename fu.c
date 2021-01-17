@@ -346,6 +346,7 @@ fu_usage()
 	fprintf(stderr,"    -k   use kanji code\n");
 	fprintf(stderr,"    -e   use euc kanji code\n");
 	fprintf(stderr,"    -s   use s-jis kanji code\n");
+	fprintf(stderr,"    -u   use utf-8 kanji code\n");
 #if XWINDOW
 	fprintf(stderr,"    -display host:display    X server name\n");
 	fprintf(stderr,"    -geometry geom           geometry of %s\n",prog_name);
@@ -356,7 +357,8 @@ fu_usage()
 	fprintf(stderr,"    -fr font_kana            kana font name\n");
 	fprintf(stderr,"    -fk font_kanji           kanji font name\n");
 	fprintf(stderr,"    -euc                     treat euc kanji code\n");
-	fprintf(stderr,"    -sjisi                   treat s-jis kanji code\n");
+	fprintf(stderr,"    -sjis                    treat s-jis kanji code\n");
+	fprintf(stderr,"    -utf8                    treat utf-8 kanji code\n");
 #endif
 
 	exit(-1);
